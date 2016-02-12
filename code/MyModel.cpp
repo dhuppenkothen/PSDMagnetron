@@ -25,21 +25,25 @@ void MyModel::calculate_mu()
         const vector<double>& f_right = data.get_f_right();
 
         // Update or from scratch?
-        bool update = (lorentzians.get_added().size() < lorentzians.get_components().size());
+        bool update_narrow = (narrowlorentzians.get_added().size() < narrowlorentzians.get_components().size());
+	bool update_wide = (widelorentzians.get_added().size() < widelorentzians.get_components().size());
 
         // Get the components
-        const vector< vector<double> >& components = (update)?(lorentzians.get_added()):
-                                (lorentzians.get_components());
+        const vector< vector<double> >& narrowcomponents = (update_narrow)?(narrowlorentzians.get_added()):
+                                (narrowlorentzians.get_components());
+
+	const vector< vector<double> >& widecomponents = (update_wide)?(widelorentzians.get_added()):
+				(widelorentzians.get_components());
 
         // Set the background level
-        if(!update)
+        if(!(narrow_update || wide_update))
                 mu.assign(mu.size(), background);
 
 //        double amplitude, skew, tc;
 //        double rise, fall;
 	double f0, amplitude, gamma;
 	double fac;
-        for(size_t j=0; j<components.size(); j++)
+        for(size_t j=0; j<widecomponents.size(); j++)
         {
                 f0 = components[j][0];
                 amplitude = components[j][1];
@@ -59,6 +63,37 @@ void MyModel::calculate_mu()
 //        vector<double> y(mu.size());
 //        double alpha = exp(-1./noise_L);
  
+//        for(size_t i=0; i<mu.size(); i++)
+//        {
+//                if(i==0)
+//                        y[i] = noise_sigma/sqrt(1. - alpha*alpha)*noise_normals[i];
+//                else
+//                        y[i] = alpha*y[i-1] + noise_sigma*noise_normals[i];
+//                mu[i] *= exp(y[i]);
+//        }
+
+
+        }
+        for(size_t j=0; j<narrowcomponents.size(); j++)
+        {
+                f0 = components[j][0];
+                amplitude = components[j][1];
+                gamma = components[j][2];
+
+                fac = 0.5*amplitude*gamma/M_PI;
+
+                for(size_t i=0; i<mu.size(); i++)
+                {
+                        // Integral over the Lorentzian distribution
+                        mu[i] += -fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
+                                  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma);
+                }
+
+        // this is a OU process; we're currently not going to use that, but it might come 
+        // in handy later, so we'll leave it commented out at the appropriate places
+//        vector<double> y(mu.size());
+//        double alpha = exp(-1./noise_L);
+
 //        for(size_t i=0; i<mu.size(); i++)
 //        {
 //                if(i==0)
@@ -110,11 +145,15 @@ double MyModel::perturb(RNG& rng)
         }
         else if(randomU() <= 0.7)
         {
-                logH += narrowlorentzians.perturb();
+                logH += narrowlorentzians.perturb(rng);
 //              spikes.consolidate_diff();
                 calculate_mu();
         }
 
+	else
+	{
+		logH += widelorentzians.perturb(rng);
+	}
 //        else if(rng.rand() <= 0.5)
 //        {
 //                noise_sigma = log(noise_sigma);
