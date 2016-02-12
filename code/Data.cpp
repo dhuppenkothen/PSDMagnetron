@@ -34,7 +34,7 @@ void Data::load(const char* filename)
 	}
 
 	fin.close();
-	cout<<"# Found "<<t.size()<<" points in file "<<filename<<"."<<endl;
+	cout<<"# Found "<<f.size()<<" points in file "<<filename<<"."<<endl;
 
 	compute_summaries();
 }
@@ -49,7 +49,7 @@ void Data::compute_summaries()
 	// Left and right edges of the data bins
 	f_left.assign(f.size(), 0.);
 	f_right.assign(f.size(), 0.);
-	for(size_f i=0; i<f.size(); i++)
+	for(size_t i=0; i<f.size(); i++)
 	{
 		f_left[i] = f[i] - 0.5*df;
 		f_right[i] = f[i] + 0.5*df;

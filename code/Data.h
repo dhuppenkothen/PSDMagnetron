@@ -23,6 +23,7 @@ class Data
 		const std::vector<double>& get_f_left() const { return f_left; }
 		const std::vector<double>& get_f_right() const { return f_right; }
 		const std::vector<double>& get_y() const { return y; }
+		const std::vector<double>& get_m() const { return m; }
 		double get_f_min() const { return f_min; }
 		double get_f_max() const { return f_max; }
 		double get_f_range() const { return f_range; }

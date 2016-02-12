@@ -10,12 +10,14 @@ const Data& MyModel::data = Data::get_instance();
 #include <iostream>
 
 MyModel::MyModel()
-:lorentzians(3, 100, false, MyConditionalPrior(data.get_f_min(), data.get_f_max()))
-//,noise_normals(data.get_t().size())
+:narrowlorentzians(3, 100, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max(),
+			1E-10, 1E10))
+,widelorentzians(3, 100, false, MyWideConditionalPrior(data.get_f_min(), data.get_f_max(),
+			1E-10, 1E10))
 ,mu(data.get_f().size())
 {
-
 }
+
 
 void MyModel::calculate_mu()
 {
@@ -40,10 +42,10 @@ void MyModel::calculate_mu()
         for(size_t j=0; j<components.size(); j++)
         {
                 f0 = components[j][0];
-                amplitude = exp(components[j][1]);
-                gamma = exp(components[j][2]);
+                amplitude = components[j][1];
+                gamma = components[j][2];
 
-		fac = 0.5*amplitude*gamma/M_PI
+		fac = 0.5*amplitude*gamma/M_PI;
 
                 for(size_t i=0; i<mu.size(); i++)
                 {
@@ -75,7 +77,8 @@ void MyModel::from_prior(RNG& rng)
 {
 	background = tan(M_PI*(0.97*rng.rand() - 0.485));
 	background = exp(background);
-	lorentzians.from_prior(rng);
+	narrowlorentzians.from_prior(rng);
+	widelorentzians.from_prior(rng);
  
 	// this, too belongs to the noise process we're not using 
 //        noise_sigma = exp(log(1E-3) + log(1E3)*rng.rand());
@@ -90,8 +93,8 @@ double MyModel::perturb(RNG& rng)
 {
 	double logH = 0.;
 
-//        if(rng.rand() <= 0.2)
-//        {
+        if(rng.rand() <= 0.2)
+        {
                 for(size_t i=0; i<mu.size(); i++)
                         mu[i] -= background;
 
@@ -104,7 +107,13 @@ double MyModel::perturb(RNG& rng)
 
                 for(size_t i=0; i<mu.size(); i++)
                         mu[i] += background;
-//        }
+        }
+        else if(randomU() <= 0.7)
+        {
+                logH += narrowlorentzians.perturb();
+//              spikes.consolidate_diff();
+                calculate_mu();
+        }
 
 //        else if(rng.rand() <= 0.5)
 //        {
@@ -142,9 +151,9 @@ double MyModel::log_likelihood() const
 	const vector<double>& m = data.get_m();
 
         double logl = 0.;
-        for(size_f i=0; i<f.size(); i++)
+        for(size_t i=0; i<f.size(); i++)
 
-		logl += -2.*m[i]*(log(mu[i]) + y[i]/mu[i] + (2.0/(2.0*m[i]) - 1.0)*log(y[i]))
+		logl += -2.*m[i]*(log(mu[i]) + y[i]/mu[i] + (2.0/(2.0*m[i]) - 1.0)*log(y[i]));
 //                logl += -mu[i] + y[i]*log(mu[i]) - lgamma(y[i] + 1.);//gsl_sf_lngamma(y[i] + 1.);
 
 
