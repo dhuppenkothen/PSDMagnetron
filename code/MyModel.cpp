@@ -156,6 +156,7 @@ double MyModel::perturb(RNG& rng)
 	else
 	{
 		logH += widelorentzians.perturb(rng);
+		calculate_mu();
 	}
 //        else if(rng.rand() <= 0.5)
 //        {
