@@ -11,7 +11,7 @@ if saveFrames:
 ion()
 for i in range(0, posterior_sample.shape[0]):
   hold(False)
-  plot(data[:,0], data[:,1]*68, 'b.')
+  plot(data[:,0], data[:,1], 'b.')
   hold(True)
   plot(data[:,0], posterior_sample[i, -data.shape[0]:], 'r')
   xlabel('Frequency', fontsize=16)
