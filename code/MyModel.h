@@ -48,6 +48,8 @@ class MyModel
 
 		// Return string with column information
 		std::string description() const;
+
+		static double cauchy_cdf(double x, double x0, double gamma);
 };
 
 #endif

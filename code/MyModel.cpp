@@ -16,6 +16,11 @@ MyModel::MyModel()
 {
 }
 
+double MyModel::cauchy_cdf(double x, double x0, double gamma)
+{
+	return atan((x - x0)/gamma)/M_PI + 0.5;
+}
+
 void MyModel::calculate_mu()
 {
         const vector<double>& f_left = data.get_f_left();
@@ -48,15 +53,16 @@ void MyModel::calculate_mu()
                 amplitude = widecomponents[j][1];
                 q = exp(widecomponents[j][2]);
 		
-		gamma = f0/q;
+			gamma = f0/q;
 		
-		fac = 0.5*amplitude*gamma/M_PI;
-
-                for(size_t i=0; i<mu.size(); i++)
+               for(size_t i=0; i<mu.size(); i++)
                 {
 			// Integral over the Lorentzian distribution
-			mu[i] += -fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
-				  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma); 
+			mu[i] += amplitude*(cauchy_cdf(f_right[i], f0, gamma)
+								- cauchy_cdf(f_left[i], f0, gamma));
+
+//-fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
+	//			  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma); 
                 } 
 
 	// this is a OU process; we're currently not going to use that, but it might come 
@@ -81,9 +87,8 @@ void MyModel::calculate_mu()
                 amplitude = narrowcomponents[j][1];
                 q = exp(narrowcomponents[j][2]);
 
-		gamma = f0/q;
-		
-                fac = 0.5*amplitude*gamma/M_PI;
+				gamma = f0/q;
+                fac = 0.5*amplitude/(gamma*M_PI);
 
                 for(size_t i=0; i<mu.size(); i++)
                 {
@@ -197,7 +202,7 @@ double MyModel::log_likelihood() const
 		
         double logl = 0.;
 	    for(size_t i=0; i<f.size(); i++)
-			logl += -m[i]*y[i]/mu[i] - 0.5*log(mu[i]) - 0.5*(1./m[i] - 1.)*log(y[i]);
+			logl += -0.5*pow((y[i] - mu[i])/0.1, 2);
 
 	return logl;
 }
