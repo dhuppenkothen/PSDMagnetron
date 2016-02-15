@@ -35,9 +35,9 @@ void MyModel::calculate_mu()
         // Set the background level
 //        if(!(update_narrow || update_wide))
 //                mu.assign(mu.size(), background);
-
+	mu.assign(mu.size(), background);
 	const vector< vector<double> >& narrowcomponents = narrowlorentzians.get_components();
-        const vector< vector<double> >& widecomponents = widelorentzians.get_components();
+	const vector< vector<double> >& widecomponents = widelorentzians.get_components();
 
 
 	double f0, amplitude, q;
@@ -208,6 +208,7 @@ void MyModel::print(std::ostream& out) const
         out<<background<<' ';
         narrowlorentzians.print(out);
         widelorentzians.print(out);
+
 	for(size_t i=0; i<mu.size(); i++)
                 out<<mu[i]<<' ';
 
