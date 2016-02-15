@@ -47,11 +47,9 @@ double MyWideConditionalPrior::perturb_hyperparameters(RNG& rng)
 	if(which == 1)
 	{
 		// check this!
-		mu_logq = mu_logq/(log(2.) - log(1E-5));
 		mu_logq += rng.randh()*(log(2.)-log(1E-5)); //log(100)*pow(10., log(2.) - log(100.)*rng.rand())*rng.randn();
 		wrap(mu_logq, log(1E-5), log(2.));
 		//mu_logq = mod(mu_logq - log(.2), log(100.)) + log(2.);
-		mu_logq = (log(2.) - log(1E-5))*mu_logq;
 	}
 	if(which == 2)
 	{
@@ -142,11 +140,9 @@ double MyNarrowConditionalPrior::perturb_hyperparameters(RNG& rng)
 	if(which == 1)
 	{
 		// check this!
-		mu_logq = mu_logq/(log(100.) - log(2.));
 		mu_logq += rng.randh()*(log(100.)-log(2.)); //log(100)*pow(10., log(2.) - log(100.)*rng.rand())*rng.randn();
 		wrap(mu_logq, log(2.), log(100));
 		//mu_logq = mod(mu_logq - log(.2), log(100.)) + log(2.);
-		mu_logq = (log(100.) - log(2.0))*mu_logq;
 	}
 	if(which == 2)
 	{
