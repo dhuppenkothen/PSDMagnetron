@@ -1,7 +1,7 @@
 from pylab import *
 import os
 
-data = loadtxt('../data/grs1915_chi3_psd.txt')
+data = loadtxt('../data/test_data3.dat')
 posterior_sample = atleast_2d(loadtxt('posterior_sample.txt'))
 
 saveFrames = False # For making movies
@@ -11,9 +11,9 @@ if saveFrames:
 ion()
 for i in range(0, posterior_sample.shape[0]):
   hold(False)
-  plot(data[:,0], data[:,1]*68, 'b.')
+  plot(data[:,0], data[:,1], linestyle="steps-mid")
   hold(True)
-  plot(data[:,0], posterior_sample[i, -data.shape[0]:], 'r')
+  loglog(data[:,0], posterior_sample[i, -data.shape[0]:], 'r')
   xlabel('Frequency', fontsize=16)
   ylabel('Power', fontsize=16)
   draw()

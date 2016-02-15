@@ -10,8 +10,8 @@ const Data& MyModel::data = Data::get_instance();
 #include <iostream>
 
 MyModel::MyModel()
-:narrowlorentzians(3, 100, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max()))
-,widelorentzians(3, 100, false, MyWideConditionalPrior(0.0, data.get_f_max()))
+:narrowlorentzians(3, 15, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max()))
+,widelorentzians(3, 10, false, MyWideConditionalPrior(0.0, data.get_f_max()))
 ,mu(data.get_f().size())
 {
 }
@@ -53,7 +53,7 @@ void MyModel::calculate_mu()
                 amplitude = widecomponents[j][1];
                 q = exp(widecomponents[j][2]);
 		
-			gamma = f0/q;
+		gamma = f0/q;
 		
                for(size_t i=0; i<mu.size(); i++)
                 {
@@ -92,9 +92,12 @@ void MyModel::calculate_mu()
 
                 for(size_t i=0; i<mu.size(); i++)
                 {
+                        mu[i] += amplitude*(cauchy_cdf(f_right[i], f0, gamma)
+                                                                - cauchy_cdf(f_left[i], f0, gamma));
+
                         // Integral over the Lorentzian distribution
-                        mu[i] += -fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
-                                  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma);
+//                        mu[i] += -fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
+//                                  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma);
                 }
 
         // this is a OU process; we're currently not going to use that, but it might come 
@@ -154,7 +157,6 @@ double MyModel::perturb(RNG& rng)
         else if(rng.rand() <= 0.7)
         {
                 logH += narrowlorentzians.perturb(rng);
-//              spikes.consolidate_diff();
                 calculate_mu();
         }
 
@@ -202,15 +204,20 @@ double MyModel::log_likelihood() const
 		
         double logl = 0.;
 	    for(size_t i=0; i<f.size(); i++)
-			logl += -0.5*pow((y[i] - mu[i])/0.1, 2);
 
+		// M=1 Chi-square likelihood (unnormalized spectra)
+		//logl += -log(mu[i]) - y[i]/mu[i];
+		
+		// Chi-square likelihood for M averaged spectra/frequency bins
+		logl += m[i]*(-(y[i]/mu[i]) - ((1./m[i]) - 1.)*log(y[i]) - log(mu[i]));
+ 
 	return logl;
 }
 
 void MyModel::print(std::ostream& out) const
 {
         out<<background<<' ';
-        narrowlorentzians.print(out);
+//        narrowlorentzians.print(out);
         widelorentzians.print(out);
 
 	for(size_t i=0; i<mu.size(); i++)

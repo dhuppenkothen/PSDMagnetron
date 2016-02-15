@@ -11,7 +11,6 @@ class Data
 
 		// Some useful summaries
 		double f_min, f_max, f_range, df;
-		double y_mean;
 		void compute_summaries();
 
 	public:
