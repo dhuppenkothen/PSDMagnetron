@@ -10,14 +10,11 @@ const Data& MyModel::data = Data::get_instance();
 #include <iostream>
 
 MyModel::MyModel()
-:narrowlorentzians(3, 100, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max(),
-			1E-10, 1E10))
-,widelorentzians(3, 100, false, MyWideConditionalPrior(data.get_f_min(), data.get_f_max(),
-			1E-10, 1E10))
+:narrowlorentzians(3, 100, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max()))
+,widelorentzians(3, 100, false, MyWideConditionalPrior(0.0, data.get_f_max()))
 ,mu(data.get_f().size())
 {
 }
-
 
 void MyModel::calculate_mu()
 {
@@ -25,30 +22,34 @@ void MyModel::calculate_mu()
         const vector<double>& f_right = data.get_f_right();
 
         // Update or from scratch?
-        bool update_narrow = (narrowlorentzians.get_added().size() < narrowlorentzians.get_components().size());
-	bool update_wide = (widelorentzians.get_added().size() < widelorentzians.get_components().size());
+//        bool update_narrow = (narrowlorentzians.get_added().size() < narrowlorentzians.get_components().size());
+//	bool update_wide = (widelorentzians.get_added().size() < widelorentzians.get_components().size());
 
         // Get the components
-        const vector< vector<double> >& narrowcomponents = (update_narrow)?(narrowlorentzians.get_added()):
-                                (narrowlorentzians.get_components());
+//        const vector< vector<double> >& narrowcomponents = (update_narrow)?(narrowlorentzians.get_added()):
+//                                (narrowlorentzians.get_components());
 
-	const vector< vector<double> >& widecomponents = (update_wide)?(widelorentzians.get_added()):
-				(widelorentzians.get_components());
+//	const vector< vector<double> >& widecomponents = (update_wide)?(widelorentzians.get_added()):
+//				(widelorentzians.get_components());
 
         // Set the background level
-        if(!(narrow_update || wide_update))
-                mu.assign(mu.size(), background);
+//        if(!(update_narrow || update_wide))
+//                mu.assign(mu.size(), background);
 
-//        double amplitude, skew, tc;
-//        double rise, fall;
-	double f0, amplitude, gamma;
-	double fac;
+	const vector< vector<double> >& narrowcomponents = narrowlorentzians.get_components();
+        const vector< vector<double> >& widecomponents = widelorentzians.get_components();
+
+
+	double f0, amplitude, q;
+	double gamma, fac;
         for(size_t j=0; j<widecomponents.size(); j++)
         {
-                f0 = components[j][0];
-                amplitude = components[j][1];
-                gamma = components[j][2];
-
+                f0 = widecomponents[j][0];
+                amplitude = widecomponents[j][1];
+                q = exp(widecomponents[j][2]);
+		
+		gamma = f0/q;
+		
 		fac = 0.5*amplitude*gamma/M_PI;
 
                 for(size_t i=0; i<mu.size(); i++)
@@ -76,10 +77,12 @@ void MyModel::calculate_mu()
         }
         for(size_t j=0; j<narrowcomponents.size(); j++)
         {
-                f0 = components[j][0];
-                amplitude = components[j][1];
-                gamma = components[j][2];
+                f0 = narrowcomponents[j][0];
+                amplitude = narrowcomponents[j][1];
+                q = exp(narrowcomponents[j][2]);
 
+		gamma = f0/q;
+		
                 fac = 0.5*amplitude*gamma/M_PI;
 
                 for(size_t i=0; i<mu.size(); i++)
@@ -143,7 +146,7 @@ double MyModel::perturb(RNG& rng)
                 for(size_t i=0; i<mu.size(); i++)
                         mu[i] += background;
         }
-        else if(randomU() <= 0.7)
+        else if(rng.rand() <= 0.7)
         {
                 logH += narrowlorentzians.perturb(rng);
 //              spikes.consolidate_diff();
@@ -202,8 +205,9 @@ double MyModel::log_likelihood() const
 void MyModel::print(std::ostream& out) const
 {
         out<<background<<' ';
-        lorentzians.print(out);
-        for(size_t i=0; i<mu.size(); i++)
+        narrowlorentzians.print(out);
+        widelorentzians.print(out);
+	for(size_t i=0; i<mu.size(); i++)
                 out<<mu[i]<<' ';
 
 }
