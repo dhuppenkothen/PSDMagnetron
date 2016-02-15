@@ -191,14 +191,13 @@ double MyModel::log_likelihood() const
 {
         const vector<double>& f = data.get_f();
         const vector<double>& y = data.get_y();
-	const vector<double>& m = data.get_m();
+		const vector<double>& m = data.get_m();
 
+		// NOTE: This log likelihood is missing a constant factor (not dependent
+		
         double logl = 0.;
-        for(size_t i=0; i<f.size(); i++)
-
-		logl += -2.*m[i]*(log(mu[i]) + y[i]/mu[i] + (2.0/(2.0*m[i]) - 1.0)*log(y[i]));
-//                logl += -mu[i] + y[i]*log(mu[i]) - lgamma(y[i] + 1.);//gsl_sf_lngamma(y[i] + 1.);
-
+	    for(size_t i=0; i<f.size(); i++)
+			logl += -m[i]*y[i]/mu[i] - 0.5*log(mu[i]) - 0.5*(1./m[i] - 1.)*log(y[i]);
 
 	return logl;
 }
