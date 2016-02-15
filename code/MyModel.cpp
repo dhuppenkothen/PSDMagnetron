@@ -141,9 +141,8 @@ double MyModel::perturb(RNG& rng)
 
         if(rng.rand() <= 0.2)
         {
-                for(size_t i=0; i<mu.size(); i++)
-                        mu[i] -= background;
-
+//                for(size_t i=0; i<mu.size(); i++)
+//                        mu[i] -= background;
                 background = log(background);
                 background = (atan(background)/M_PI + 0.485)/0.97;
                 background += pow(10., 1.5 - 6.*rng.rand())*rng.randn();
@@ -151,10 +150,12 @@ double MyModel::perturb(RNG& rng)
                 background = tan(M_PI*(0.97*background - 0.485));
                 background = exp(background);
 
-                for(size_t i=0; i<mu.size(); i++)
-                        mu[i] += background;
+			calculate_mu();
+
+//                for(size_t i=0; i<mu.size(); i++)
+//                        mu[i] += background;
         }
-        else if(rng.rand() <= 0.7)
+        else if(rng.rand() <= 0.5)
         {
                 logH += narrowlorentzians.perturb(rng);
                 calculate_mu();
