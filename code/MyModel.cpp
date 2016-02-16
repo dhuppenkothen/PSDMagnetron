@@ -219,7 +219,7 @@ double MyModel::log_likelihood() const
 void MyModel::print(std::ostream& out) const
 {
         out<<background<<' ';
-//        narrowlorentzians.print(out);
+        narrowlorentzians.print(out);
         widelorentzians.print(out);
 
 	for(size_t i=0; i<mu.size(); i++)
