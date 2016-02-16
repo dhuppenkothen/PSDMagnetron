@@ -1,0 +1,21 @@
+Column 0 = background (constant) level
+Column 1 = dimensionality of a lorentzian (3)
+Column 2 = maximum number of 'narrow' lorentzians (15)
+Column 3 = mu_amp hyperparameter for 'narrow' lorentzians
+Column 4 = mu_logq hyperparameter for 'narrow' lorentzians
+Column 5 = sig_logq hyperparameter for 'narrow' lorentzians
+Column 6 = Number of 'narrow' lorentzians
+Columns 7-21 = Centroid frequency for 'narrow' lorentzians (zero padded)
+Columns 22-36 = 'Masses' of 'narrow' lorentzians (total area) (zero padded)
+Columns 37-51 = log(q) of 'narrow' lorentzians (zero padded)
+Column 52 = dimensionality of a lorentzian (3)
+Column 53 = maximum number of 'wide' lorentzians (10)
+Column 54 = mu_amp hyperparameter for 'wide' lorentzians
+Column 55 = mu_logq hyperparameter for 'wide' lorentzians
+Column 56 = sig_logq hyperparameter for 'wide' lorentzians
+Column 57 = Number of 'wide' lorentzians
+Columns 58-67 = Centroid frequency for 'wide' lorentzians (zero padded)
+Columns 68-77 = 'Masses' of 'wide' lorentzians (total area) (zero padded)
+Columns 78-87 = log(q) of 'wide' lorentzians (zero padded)
+Columns 88-end = The model-predicted noise-free spectrum
+
