@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-
+#include <cmath>
 using namespace std;
 
 Data Data::instance;
@@ -37,7 +37,20 @@ void Data::load(const char* filename)
 	cout<<"# Found "<<f.size()<<" points in file "<<filename<<"."<<endl;
 
 	compute_summaries();
+	compute_prefac();
 }
+
+void Data::compute_prefac()
+{
+
+        pre_fac.assign(m.size(), 0.);
+
+	for (size_t i=0; i<m.size(); i++)
+		pre_fac[i] = (1./m[i])*(log(2.*m[i]) - m[i]*log(2.) - lgamma(m[i]))
+                         + (1.- 1./m[i])*log(2.*m[i]); 
+
+}
+
 
 void Data::compute_summaries()
 {

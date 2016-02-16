@@ -199,19 +199,20 @@ double MyModel::log_likelihood() const
 {
         const vector<double>& f = data.get_f();
         const vector<double>& y = data.get_y();
-		const vector<double>& m = data.get_m();
+	const vector<double>& m = data.get_m();
+        const vector<double>& pre_fac = data.get_prefac();
 
-		// NOTE: This log likelihood is missing a constant factor (not dependent
-		
         double logl = 0.;
 	    for(size_t i=0; i<f.size(); i++)
-
+		{
 		// M=1 Chi-square likelihood (unnormalized spectra)
 		//logl += -log(mu[i]) - y[i]/mu[i];
-		
+			
 		// Chi-square likelihood for M averaged spectra/frequency bins
-		logl += m[i]*(-(y[i]/mu[i]) - ((1./m[i]) - 1.)*log(y[i]) - log(mu[i]));
- 
+//              logl += m[i]*(-(y[i]/mu[i]) - ((1./m[i]) - 1.)*log(y[i]) - log(mu[i]));
+		
+		logl += m[i]*(pre_fac[i]-(y[i]/mu[i]) - ((1./m[i]) - 1.)*log(y[i]) - log(mu[i]));
+ 		}
 	return logl;
 }
 
