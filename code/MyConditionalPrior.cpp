@@ -77,7 +77,7 @@ void MyWideConditionalPrior::from_uniform(std::vector<double>& vec) const
 	if (vec[2] < 0.5)
 		vec[2] = mu_logq + sigma_logq*log(2.*vec[2]);
 	else
-		vec[2] = mu_logq + sigma_logq*log(2. - 2.*vec[2]);
+		vec[2] = mu_logq - sigma_logq*log(2. - 2.*vec[2]);
 
 }
 
