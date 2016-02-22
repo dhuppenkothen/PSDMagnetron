@@ -11,7 +11,7 @@ const Data& MyModel::data = Data::get_instance();
 
 MyModel::MyModel()
 :narrowlorentzians(3, 15, false, MyNarrowConditionalPrior(data.get_f_min(), data.get_f_max()))
-,widelorentzians(3, 10, false, MyWideConditionalPrior(0.0, data.get_f_max()))
+// //,widelorentzians(3, 10, false, MyWideConditionalPrior(0.0, data.get_f_max()))
 ,mu(data.get_f().size())
 {
 }
@@ -41,29 +41,29 @@ void MyModel::calculate_mu()
 //        if(!(update_narrow || update_wide))
 //                mu.assign(mu.size(), background);
 	mu.assign(mu.size(), background);
+
 	const vector< vector<double> >& narrowcomponents = narrowlorentzians.get_components();
-	const vector< vector<double> >& widecomponents = widelorentzians.get_components();
+
+// //	const vector< vector<double> >& widecomponents = widelorentzians.get_components();
 
 
 	double f0, amplitude, q;
 	double gamma, fac;
-        for(size_t j=0; j<widecomponents.size(); j++)
-        {
-                f0 = widecomponents[j][0];
-                amplitude = widecomponents[j][1];
-                q = exp(widecomponents[j][2]);
+//        for(size_t j=0; j<widecomponents.size(); j++)
+//        {
+//                f0 = widecomponents[j][0];
+//                amplitude = widecomponents[j][1];
+//                q = exp(widecomponents[j][2]);
 		
-		gamma = f0/q;
+//		gamma = f0/q;
 		
-               for(size_t i=0; i<mu.size(); i++)
-                {
+//               for(size_t i=0; i<mu.size(); i++)
+//                {
 			// Integral over the Lorentzian distribution
-			mu[i] += amplitude*(cauchy_cdf(f_right[i], f0, gamma)
-								- cauchy_cdf(f_left[i], f0, gamma));
+//			mu[i] += amplitude*(cauchy_cdf(f_right[i], f0, gamma)
+//								- cauchy_cdf(f_left[i], f0, gamma));
 
-//-fac*(2./gamma)*atan((2.*(f0-f_right[i]))/gamma) +
-	//			  fac*(2./gamma)*atan((2.*(f0-f_left[i]))/gamma); 
-                } 
+//                } 
 
 	// this is a OU process; we're currently not going to use that, but it might come 
 	// in handy later, so we'll leave it commented out at the appropriate places
@@ -80,7 +80,7 @@ void MyModel::calculate_mu()
 //        }
 
 
-        }
+//        }
         for(size_t j=0; j<narrowcomponents.size(); j++)
         {
                 f0 = narrowcomponents[j][0];
@@ -124,7 +124,7 @@ void MyModel::from_prior(RNG& rng)
 	background = tan(M_PI*(0.97*rng.rand() - 0.485));
 	background = exp(background);
 	narrowlorentzians.from_prior(rng);
-	widelorentzians.from_prior(rng);
+// //	widelorentzians.from_prior(rng);
  
 	// this, too belongs to the noise process we're not using 
 //        noise_sigma = exp(log(1E-3) + log(1E3)*rng.rand());
@@ -155,17 +155,20 @@ double MyModel::perturb(RNG& rng)
 //                for(size_t i=0; i<mu.size(); i++)
 //                        mu[i] += background;
         }
-        else if(rng.rand() <= 0.5)
+//        else if(rng.rand() <= 0.5)
+	else
         {
                 logH += narrowlorentzians.perturb(rng);
                 calculate_mu();
         }
 
-	else
-	{
-		logH += widelorentzians.perturb(rng);
-		calculate_mu();
-	}
+//	else
+//	{
+//		logH += widelorentzians.perturb(rng);
+//		calculate_mu();
+//	}
+
+
 //        else if(rng.rand() <= 0.5)
 //        {
 //                noise_sigma = log(noise_sigma);
@@ -220,7 +223,7 @@ void MyModel::print(std::ostream& out) const
 {
         out<<background<<' ';
         narrowlorentzians.print(out);
-        widelorentzians.print(out);
+//        widelorentzians.print(out);
 
 	for(size_t i=0; i<mu.size(); i++)
                 out<<mu[i]<<' ';

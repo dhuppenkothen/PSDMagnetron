@@ -19,7 +19,7 @@ class MyModel
  
 		// The Lorentzians
 		DNest4::RJObject<MyNarrowConditionalPrior> narrowlorentzians;
-		DNest4::RJObject<MyWideConditionalPrior> widelorentzians;
+//		DNest4::RJObject<MyWideConditionalPrior> widelorentzians;
 		// Extra white noise on teh Poisson rate
 //		std::vector<double> noise_normals;
 //		double noise_sigma, noise_L;
