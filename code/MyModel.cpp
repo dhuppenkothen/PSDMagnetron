@@ -84,7 +84,7 @@ void MyModel::calculate_mu()
         for(size_t j=0; j<narrowcomponents.size(); j++)
         {
                 f0 = narrowcomponents[j][0];
-                amplitude = narrowcomponents[j][1];
+                amplitude = exp(narrowcomponents[j][1]);
                 q = exp(narrowcomponents[j][2]);
 
 				gamma = f0/q;

@@ -107,10 +107,12 @@ MyNarrowConditionalPrior::MyNarrowConditionalPrior(double x_min, double x_max)
 
 void MyNarrowConditionalPrior::from_prior(RNG& rng)
 {
-	// Cauchy prior on the mean of the exponential amplitude prior
-	mu_amp = tan(M_PI*(0.97*rng.rand() - 0.485));
-	mu_amp = exp(mu_amp);
+	// Cauchy prior on the mean of the Laplacian  amplitude prior
+	mu_loga = tan(M_PI*(0.97*rng.rand() - 0.485));
+//	mu_amp = exp(mu_amp);
 
+	sigma_loga = (5.0-0.)*rng.rand() + 0.0;
+  
 	// Uniform prior on the mean of the Laplacian logq prior:
 	mu_logq = (log(100.)-log(1E-5))*rng.rand() + log(1E-5);
 	// Uniform prior on the width of the Laplacian logq prior:
@@ -126,18 +128,23 @@ double MyNarrowConditionalPrior::perturb_hyperparameters(RNG& rng)
 {
 	double logH = 0.;
 
-	int which = rng.rand_int(3);
+	int which = rng.rand_int(4);
 
 	if(which == 0)
 	{
-		mu_amp = log(mu_amp);
-		mu_amp = (atan(mu_amp)/M_PI + 0.485)/0.97;
-		mu_amp += rng.randh();
- 		wrap(mu_amp, 0., 1.);
-		mu_amp = tan(M_PI*(0.97*mu_amp - 0.485));
-		mu_amp = exp(mu_amp);
+		mu_loga = log(mu_loga);
+		mu_loga = (atan(mu_loga)/M_PI + 0.485)/0.97;
+		mu_loga += rng.randh();
+ 		wrap(mu_loga, 0., 1.);
+		mu_loga = tan(M_PI*(0.97*mu_loga - 0.485));
+		mu_loga = exp(mu_loga);
 	}
 	if(which == 1)
+	{
+		sigma_loga += rng.randh()*(5. - 0.);
+		wrap(sigma_loga, 0., 5.);
+	}
+	if(which == 2)
 	{
 		// check this!
 		mu_logq += rng.randh()*(log(100.)-log(1E-5)); //log(100)*pow(10., log(2.) - log(100.)*rng.rand())*rng.randn();
@@ -157,16 +164,23 @@ double MyNarrowConditionalPrior::log_pdf(const std::vector<double>& vec) const
 	if(vec[0] < x_min || vec[0] > x_max || vec[1] < 0.0) 
 		return -1E300;
 
-	return -log(mu_amp) - vec[1]/mu_amp - log(2.*sigma_logq) - 
-			std::abs(vec[2]-mu_logq)/sigma_logq;
-	//return -log(mu) - vec[1]/mu - log(mu_widths)
-	//		- (vec[2] - min_width)/mu_widths - log(2.*b*vec[3]);
+        return -log(2.*sigma_loga) - std::abs(vec[1] - mu_loga)/sigma_loga
+			 - log(2.*sigma_logq) - std::abs(vec[2]-mu_logq)/sigma_logq;
+
+//	return -log(mu_amp) - vec[1]/mu_amp - log(2.*sigma_logq) - 
+//			std::abs(vec[2]-mu_logq)/sigma_logq;
 }
 
 void MyNarrowConditionalPrior::from_uniform(std::vector<double>& vec) const
 {
 	vec[0] = x_min + (x_max - x_min)*vec[0];
-	vec[1] = -mu_amp*log(1. - vec[1]);
+//	vec[1] = -mu_amp*log(1. - vec[1]);
+        if (vec[1] < 0.5)
+                vec[1] = mu_loga + sigma_loga*log(2.*vec[1]);
+        else
+                vec[1] = mu_loga + sigma_loga*log(2. - 2.*vec[1]);
+
+
 	if (vec[2] < 0.5)
 		vec[2] = mu_logq + sigma_logq*log(2.*vec[2]);
 	else
@@ -177,17 +191,23 @@ void MyNarrowConditionalPrior::from_uniform(std::vector<double>& vec) const
 void MyNarrowConditionalPrior::to_uniform(std::vector<double>& vec) const
 {
 	vec[0] = (vec[0] - x_min)/(x_max - x_min);
-	vec[1] = 1. - exp(-vec[1]/mu_amp);
+//	vec[1] = 1. - exp(-vec[1]/mu_amp);
+
+        if (vec[1] < mu_logq)
+                vec[1] = 0.5*exp((vec[1] - mu_loga)/sigma_loga);
+        else
+                vec[1] = 1.0 - 0.5*exp((mu_loga - vec[1])/sigma_loga);
+
 	if (vec[2] < mu_logq)
-		vec[2] = 0.5*exp((vec[2] - mu_logq)/sigma_logq);
+		vec[1] = 0.5*exp((vec[2] - mu_logq)/sigma_logq);
 	else
-		vec[2] = 1.0 - 0.5*exp((mu_logq - vec[2])/sigma_logq);
+		vec[1] = 1.0 - 0.5*exp((mu_logq - vec[2])/sigma_logq);
 
 }
 
 void MyNarrowConditionalPrior::print(std::ostream& out) const
 {
-	out<<mu_amp<<' '<<mu_logq<<' '<<sigma_logq<<' ';
+	out<<mu_loga<<' '<<sigma_loga<<' '<<mu_logq<<' '<<sigma_logq<<' ';
 }
 
 

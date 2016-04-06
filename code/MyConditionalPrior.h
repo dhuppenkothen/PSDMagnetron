@@ -10,7 +10,7 @@ class MyNarrowConditionalPrior:public DNest4::ConditionalPrior
 		double x_min, x_max;
 
 		// Mean of amplitudes and widths
-		double mu_amp;
+		double mu_loga;
 
 		// Uniform for log-skews
 		double mu_logq, sigma_logq; // Midpoint and half-width
