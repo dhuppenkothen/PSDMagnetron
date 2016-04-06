@@ -5,12 +5,12 @@
 
 using namespace DNest4;
 
-MyWideConditionalPrior::MyWideConditionalPrior(double x_min, double x_max)
-:x_min(x_min)
-,x_max(x_max)
-{
+//MyWideConditionalPrior::MyWideConditionalPrior(double x_min, double x_max)
+//:x_min(x_min)
+//,x_max(x_max)
+//{
 
-}
+//}
 
 void MyWideConditionalPrior::from_prior(RNG& rng)
 {
@@ -112,7 +112,7 @@ void MyNarrowConditionalPrior::from_prior(RNG& rng)
 	mu_amp = exp(mu_amp);
 
 	// Uniform prior on the mean of the Laplacian logq prior:
-	mu_logq = (log(100.)-log(2.))*rng.rand() + log(2.);
+	mu_logq = (log(100.)-log(1E-5))*rng.rand() + log(1E-5);
 	// Uniform prior on the width of the Laplacian logq prior:
 	sigma_logq = 2.*rng.rand(); 
 
@@ -140,8 +140,8 @@ double MyNarrowConditionalPrior::perturb_hyperparameters(RNG& rng)
 	if(which == 1)
 	{
 		// check this!
-		mu_logq += rng.randh()*(log(100.)-log(2.)); //log(100)*pow(10., log(2.) - log(100.)*rng.rand())*rng.randn();
-		wrap(mu_logq, log(2.), log(100));
+		mu_logq += rng.randh()*(log(100.)-log(1E-5)); //log(100)*pow(10., log(2.) - log(100.)*rng.rand())*rng.randn();
+		wrap(mu_logq, log(1E-5), log(100));
 		//mu_logq = mod(mu_logq - log(.2), log(100.)) + log(2.);
 	}
 	if(which == 2)
